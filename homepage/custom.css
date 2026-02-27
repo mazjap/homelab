@@ -1,0 +1,94 @@
+/* Custom search container */
+#custom-search-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  position: relative;
+}
+
+#custom-search-input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 16px;
+  border: 2px solid rgb(var(--color-300));
+  border-radius: 12px;
+  background: rgb(var(--color-100));
+  color: rgb(var(--color-900));
+  transition: all 0.2s;
+}
+
+#custom-search-input:focus {
+  outline: none;
+  border-color: rgb(var(--color-500));
+  box-shadow: 0 0 0 3px rgba(var(--color-500), 0.1);
+}
+
+#custom-search-input::placeholder {
+  color: rgb(var(--color-600));
+}
+
+@media (prefers-color-scheme: dark) {
+  #custom-search-input {
+    background: rgb(var(--color-800));
+    color: rgb(var(--color-100));
+    border-color: rgb(var(--color-700));
+  }
+  
+  #custom-search-input::placeholder {
+    color: rgb(var(--color-500));
+  }
+}
+
+/* Autocomplete suggestions */
+#search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgb(var(--color-100));
+  border: 2px solid rgb(var(--color-300));
+  border-radius: 12px;
+  margin-top: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 9999;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  #search-suggestions {
+    background: rgb(var(--color-800));
+    border-color: rgb(var(--color-700));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.suggestion-item {
+  padding: 14px 20px;
+  cursor: pointer;
+  border-bottom: 1px solid rgb(var(--color-300));
+  transition: background 0.15s ease;
+  font-size: 15px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .suggestion-item {
+    border-bottom-color: rgb(var(--color-700));
+  }
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+  background: rgb(var(--color-200));
+}
+
+@media (prefers-color-scheme: dark) {
+  .suggestion-item:hover,
+  .suggestion-item.selected {
+    background: rgb(var(--color-700));
+  }
+}
