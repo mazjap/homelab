@@ -8,12 +8,17 @@
 pihole/
 unbound/
 wg-easy/
-homepage/
 gitea/
 uptime-kuma/
 portainer/
 nginx-proxy-manager/
 glances/
+
+# Homepage - Keep configs, ignore runtime data
+homepage/logs/
+homepage/*.log
+homepage/.next/
+homepage/cache/
 
 # Backups
 *.tar.gz

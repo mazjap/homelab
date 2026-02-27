@@ -1,0 +1,32 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/info-widgets/
+
+- logo:
+    icon: https://jordan-christensen.com/images/favicon.ico
+
+- search:
+    provider: custom
+    url: http://192.168.0.40:8282/web?s=
+    target: _blank
+
+- openweathermap:
+    label: {{HOMEPAGE_VAR_USER_LOCATION_LABEL}}
+    latitude: {{HOMEPAGE_VAR_USER_LATITUDE}}
+    longitude: {{HOMEPAGE_VAR_USER_LONGITUDE}}
+    units: imperial
+    apiKey: {{HOMEPAGE_VAR_OPENWEATHERMAP_API_KEY}}
+    cache: 5
+
+- glances:
+    url: http://192.168.0.40:61208
+    metric: info
+    version: 4
+    cpu: true
+    mem: true
+    cputemp: true
+    uptime: true
+    disk: /
+    diskUnits: bytes
+    expanded: true
+    label: Jordan's Homelab

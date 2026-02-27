@@ -1,0 +1,29 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/bookmarks
+
+- Developer:
+    - Github:
+        - abbr: GH
+          href: https://github.com
+    - Gitea:
+        - abbr: GT
+          href: http://gitea.home
+
+- Homelab:
+    - Reddit Homelab:
+        - abbr: r/HL
+          href: https://reddit.com/r/homelab
+    - Self-Hosted:
+        - abbr: r/SH
+          href: https://reddit.com/r/selfhosted
+
+- Personal:
+    - WGU:
+        - abbr: WGU
+          href: https://wgu.edu
+
+- Entertainment:
+    - YouTube:
+        - abbr: YT
+          href: https://youtube.com/

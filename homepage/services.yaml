@@ -1,0 +1,70 @@
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/services/
+
+- Network Services:
+    - Pi-hole:
+        href: http://192.168.0.40:8082/admin
+        description: Network-wide ad blocking and monitoring
+        icon: pi-hole.png
+        container: pihole
+        widget:
+          type: pihole
+          url: http://10.2.0.3
+          version: 6
+          key: "{{HOMEPAGE_VAR_PIHOLE_API_KEY}}"
+    - WireGuard:
+        href: http://192.168.0.40:51821
+        description: Secure VPN access from anywhere
+        icon: wireguard.png
+        container: wg-easy
+        widget:
+          type: wgeasy
+          url: http://192.168.0.40:51821
+          version: 1
+          password: {{HOMEPAGE_VAR_WIREGUARD_PASSWORD}}
+          threshold: 5
+          
+    - Unbound:
+        href: http://192.168.0.40:5335
+        description: Recursive DNS resolver for privacy
+        icon: unbound.png 
+        container: unbound
+    
+- Search & Discovery:
+    - 4Get:
+        href: http://192.168.0.40:8282
+        description: Privacy-respecting Google proxy engine
+        icon: mdi-magnify
+        container: fourget
+
+- System Management:
+    - Portainer:
+        href: http://192.168.0.40:9000
+        description: Docker container management
+        icon: portainer.png
+        container: portainer
+        widget:
+          type: portainer
+          url: http://192.168.0.40:9000
+          env: 3
+          key: {{HOMEPAGE_VAR_PORTAINER_API_KEY}}
+
+    - Uptime Kuma:
+        href: http://192.168.0.40:3001
+        description: Service uptime monitoring
+        icon: uptime-kuma.png
+        container: uptime-kuma
+        widget:
+          type: uptimekuma
+          url: http://192.168.0.40:3001
+          slug: status
+    - NginX Proxy Manager:
+        href: http://192.168.0.40:81
+        description: Reverse proxy management
+        icon: nginx.png
+        container: nginx-proxy-manager
+        widget:
+          type: npm
+          url: http://192.168.0.40:81
+          username: {{HOMEPAGE_VAR_NPM_USERNAME}}
+          password: {{HOMEPAGE_VAR_NPM_PASSWORD}}
