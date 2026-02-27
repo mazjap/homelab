@@ -1,0 +1,60 @@
+# Secrets and sensitive data
+.env
+*.env
+.env.*
+!.env.example
+
+# Service data directories (contain runtime data, databases, logs)
+pihole/
+unbound/
+wg-easy/
+homepage/
+gitea/
+uptime-kuma/
+portainer/
+nginx-proxy-manager/
+glances/
+
+# Backups
+*.tar.gz
+*.zip
+*.bak
+backup/
+backups/
+
+# Logs
+*.log
+logs/
+
+# Linux/Unix system files
+*~
+*.swp
+*.swo
+.*.swp
+.*.swo
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Neovim/Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+.netrwhist
+
+# Temporary files
+tmp/
+temp/
+*.tmp
