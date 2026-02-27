@@ -175,6 +175,21 @@ services:
       pihole_net:
         ipv4_address: 10.2.0.12
 
+  linkding:
+    container_name: linkding
+    image: sissbruecker/linkding:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./linkding:/etc/linkding/data
+    environment:
+      LD_SUPERUSER_NAME: jman
+      LD_SUPERUSER_PASSWORD: ${LINKDING_PASSWORD}
+    networks:
+      pihole_net:
+        ipv4_address: 10.2.0.14
+
 networks:
   pihole_net:
     driver: bridge
