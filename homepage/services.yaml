@@ -36,6 +36,11 @@
         description: Privacy-respecting Google proxy engine
         icon: mdi-magnify
         container: fourget
+    - Linkding:
+        href: http://192.168.0.40:9090
+        description: Bookmark manager
+        icon: linkding
+        container: linkding
 
 - System Management:
     - Portainer:
