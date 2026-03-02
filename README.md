@@ -12,6 +12,8 @@ Raspberry Pi 5 (8GB) running Docker-based homelab services.
 - Uptime Kuma
 - Portainer
 - Nginx Proxy Manager
+- Paperless
+- Linkding
 
 ## Setup
 
