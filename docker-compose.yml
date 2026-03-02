@@ -44,7 +44,8 @@ services:
       - "51821:51821/tcp"
     environment:
       WG_HOST: 38.78.243.102
-      PASSWORD_HASH: $$2a$$12$$XRflXLxQZEC805qvu3zNNeUjpUSc3pII/3H4mCvhRFXNrZMYds/1K
+      # Generate a password hash via `docker run -it ghcr.io/wg-easy/wg-easy wgpw 'YourPassword123'`
+      PASSWORD_HASH: ${WIREGUARD_PASSWORD_HASH}
       WG_DEFAULT_DNS: 10.2.0.3
       WG_ALLOWED_IPS: 0.0.0.0/0,::/0
     volumes:
@@ -71,7 +72,6 @@ services:
     environment:
       TZ: America/Denver
       HOMEPAGE_ALLOWED_HOSTS: 192.168.0.40:3000,homepage.home,page.home
-      # Add your secrets here
       HOMEPAGE_VAR_WIREGUARD_PASSWORD: ${WIREGUARD_PASSWORD}
       HOMEPAGE_VAR_PIHOLE_API_KEY: ${PIHOLE_API_KEY}
       HOMEPAGE_VAR_PORTAINER_API_KEY: ${PORTAINER_API_KEY}
@@ -81,6 +81,7 @@ services:
       HOMEPAGE_VAR_USER_LATITUDE: ${USER_LATITUDE}
       HOMEPAGE_VAR_USER_LONGITUDE: ${USER_LONGITUDE}
       HOMEPAGE_VAR_USER_LOCATION_LABEL: ${USER_LOCATION_LABEL}
+      HOMEPAGE_VAR_PAPERLESS_API_KEY: ${PAPERLESS_API_KEY}
     networks:
       pihole_net:
         ipv4_address: 10.2.0.5
@@ -189,6 +190,60 @@ services:
     networks:
       pihole_net:
         ipv4_address: 10.2.0.14
+
+  paperless-redis:
+    container_name: paperless-redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - ./paperless/redis:/data
+    networks:
+      pihole_net:
+        ipv4_address: 10.2.0.15
+
+  paperless-db:
+    container_name: paperless-db
+    image: postgres:15-alpine
+    restart: unless-stopped
+    volumes:
+      - ./paperless/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${PAPERLESS_DB_PASSWORD}
+    networks:
+      pihole_net:
+        ipv4_address: 10.2.0.16
+
+  paperless:
+    container_name: paperless
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - paperless-db
+      - paperless-redis
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./paperless/data:/usr/src/paperless/data
+      - ./paperless/media:/usr/src/paperless/media
+      - ./paperless/export:/usr/src/paperless/export
+      - ./paperless/consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://10.2.0.15:6379
+      PAPERLESS_DBHOST: 10.2.0.16
+      PAPERLESS_DBNAME: paperless
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: ${PAPERLESS_DB_PASSWORD}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_URL: http://paperless.home
+      PAPERLESS_TIME_ZONE: America/Denver
+      PAPERLESS_OCR_LANGUAGE: eng
+      USERMAP_UID: 1000
+      USERMAP_GID: 1000
+    networks:
+      pihole_net:
+        ipv4_address: 10.2.0.17
 
 networks:
   pihole_net:
