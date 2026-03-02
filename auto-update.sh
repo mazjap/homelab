@@ -87,8 +87,11 @@ cd /home/jman/pistack
 # Pull latest images
 log "Pulling latest images..."
 
-# Pull everything, except 4get (bc it's not in the registry since it's manually compiled)
-docker compose pull pihole unbound wg-easy homepage uptime-kuma portainer nginx-proxy-manager glances linkding >> "$LOG_FILE" 2>&1
+# Get list of all services except fourget (bc it's not in the registry since it's manually compiled)
+SERVICES=$(docker compose config --services | grep -v "^fourget$" | tr '\n' ' ')
+log "Services to update: $SERVICES"
+
+docker compose pull $SERVICES >> "$LOG_FILE" 2>&1
 
 if [ $? -ne 0 ]; then
     log "ERROR: Failed to pull images, aborting container update"
