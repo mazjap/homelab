@@ -14,6 +14,7 @@ portainer/
 nginx-proxy-manager/
 glances/
 linkding/
+paperless/
 
 # Homepage - Keep configs, ignore runtime data
 homepage/logs/
