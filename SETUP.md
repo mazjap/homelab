@@ -139,7 +139,7 @@ docker ps
 | Service             | Docker IP | External Port | Internal Port | Access URL               |
 |---------------------|-----------|---------------|---------------|--------------------------|
 | Unbound             | 10.2.0.2  | 5335          | 53            | N/A (DNS only)           |
-| Pi-hole             | 10.2.0.3  | 53, 8082      | 53, 80        | http://pihole.home/admin |
+| Pihole             | 10.2.0.3  | 53, 8082      | 53, 80        | http://pihole.home/admin |
 | WireGuard           | 10.2.0.4  | 51820, 51821  | 51820, 51821  | http://vpn.home          |
 | Homepage            | 10.2.0.5  | 3000          | 3000          | http://homepage.home     |
 | Glances             | 10.2.0.7  | 61208         | 61208         | http://glances.home      |
@@ -153,7 +153,7 @@ docker ps
 | Paperless DB        | 10.2.0.16 | -             | 5432          | N/A (internal)           |
 | Paperless           | 10.2.0.17 | 8000          | 8000          | http://paperless.home    |
 
-### Pi-hole Setup
+### Pihole Setup
 
 1. Access: http://192.168.0.40:8082/admin
 2. Set password:
@@ -168,9 +168,9 @@ docker ps
    - Settings -> Web Interface/API (Expert mode on) -> Advanced Settings -> Configure app password
    - Add to `.env` as `PIHOLE_API_KEY`
 
-### Pi-hole Local DNS Records
+### Pihole Local DNS Records
 
-Go to Pi-hole -> Local DNS -> DNS Records, add:
+Go to Pihole -> Local DNS -> DNS Records, add:
 ```
 homepage.home      192.168.0.40
 page.home          192.168.0.40
@@ -468,7 +468,7 @@ http://192.168.0.40:61208
 
 ### DNS Not Working
 ```bash
-# Check Pi-hole
+# Check Pihole
 docker compose logs pihole
 
 # Test DNS
