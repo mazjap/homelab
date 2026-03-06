@@ -50,6 +50,16 @@
           type: paperlessngx
           url: http://192.168.0.40:8000
           key: {{HOMEPAGE_VAR_PAPERLESS_API_KEY}}
+    - Immich:
+        href: http://192.168.0.40:2283
+        description: Photo manager
+        icon: immich
+        container: immich-server
+        widget:
+          type: immich
+          url: http://192.168.0.40:2283
+          key: {{HOMEPAGE_VAR_IMMICH_API_KEY}}
+          version: 2
 
 - System Management:
     - Portainer:

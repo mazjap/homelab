@@ -15,6 +15,7 @@ nginx-proxy-manager/
 glances/
 linkding/
 paperless/
+immich/
 
 # Homepage - Keep configs, ignore runtime data
 homepage/logs/
