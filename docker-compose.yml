@@ -314,6 +314,46 @@ services:
       pihole_net:
         ipv4_address: 10.2.0.22
 
+  romm:
+    container_name: romm
+    image: rommapp/romm:latest
+    restart: unless-stopped
+    environment:
+      DB_HOST: romm-db
+      DB_NAME: romm
+      DB_USER: romm-user
+      DB_PASSWD: ${ROMM_DB_PASSWORD}
+      ROMM_AUTH_SECRET_KEY: ${ROMM_AUTH_SECRET}
+      IGDB_CLIENT_ID: ${IGDB_CLIENT_ID}
+      IGDB_CLIENT_SECRET: ${IGDB_CLIENT_SECRET}
+    volumes:
+      - ./romm/resources:/romm/resources
+      - ./romm/library:/romm/library
+      - ./romm/assets:/romm/assets
+      - ./romm/config:/romm/config
+    ports:
+      - "8080:8080"
+    depends_on:
+      - romm-db
+    networks:
+      pihole_net:
+        ipv4_address: 10.2.0.23
+
+  romm-db:
+    container_name: romm-db
+    image: mariadb:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${ROMM_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: romm
+      MYSQL_USER: romm-user
+      MYSQL_PASSWORD: ${ROMM_DB_PASSWORD}
+    volumes:
+      - ./romm/mysql:/var/lib/mysql
+    networks:
+      pihole_net:
+        ipv4_address: 10.2.0.24
+
 networks:
   pihole_net:
     driver: bridge

@@ -16,6 +16,7 @@ glances/
 linkding/
 paperless/
 immich/
+romm/
 
 # Homepage - Keep configs, ignore runtime data
 homepage/logs/
