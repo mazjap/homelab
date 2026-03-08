@@ -1,7 +1,7 @@
 #!/bin/bash
 
-LOG_FILE="/home/jman/pistack/update.log"
-BACKUP_DIR="/home/jman/pistack/backups"
+LOG_FILE="/mnt/pistack-data/pistack/update.log"
+BACKUP_DIR="/mnt/pistack-data/pistack/backups"
 DATE=$(date +%Y%m%d_%H%M%S)
 START_TIME=$(date +%s)
 
@@ -16,7 +16,7 @@ mkdir -p "$BACKUP_DIR"
 
 # Backup configuration files only (not runtime data)
 log "Creating backup..."
-cd /home/jman/pistack
+cd /mnt/pistack-data/pistack
 tar -czf "$BACKUP_DIR/pistack-$DATE.tar.gz" \
     docker-compose.yml \
     .env \
