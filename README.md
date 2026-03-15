@@ -14,6 +14,8 @@ Raspberry Pi 5 (8GB) running Docker-based homelab services.
 - Nginx Proxy Manager
 - Paperless
 - Linkding
+- Romm
+- Immich
 
 ## Setup
 
