@@ -8,7 +8,7 @@ Raspberry Pi 5 (8GB) running Docker-based homelab services.
 - WireGuard VPN
 - Gitea (Git Server)
 - Homepage Dashboard
-- 4get Search
+- 4get Search Proxy
 - Uptime Kuma
 - Portainer
 - Nginx Proxy Manager
