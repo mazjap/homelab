@@ -37,7 +37,7 @@ log "Backup created: $BACKUP_DIR/pistack-$DATE.tar.gz"
 
 # Update 4get
 log "Updating 4get..."
-cd /home/jman/4get
+cd /mnt/pistack-data/4get
 
 # Stash any uncommitted changes
 git stash
@@ -63,7 +63,7 @@ if [ "$BEHIND" -gt 0 ]; then
         log "4get merged successfully, rebuilding..."
         
         # Try to build
-        docker build --platform linux/arm64 -t 4get-arm:latest . >> "$LOG_FILE" 2>&1
+	docker build --platform linux/arm64 -t 4get-arm:latest -f /mnt/pistack-data/4get/Dockerfile /mnt/pistack-data/4get >> "$LOG_FILE" 2>&1
         
         if [ $? -ne 0 ]; then
             log "ERROR: 4get build failed, reverting..."
@@ -82,7 +82,7 @@ fi
 
 # Update Docker containers
 log "Updating Docker containers..."
-cd /home/jman/pistack
+cd /mnt/pistack-data/pistack
 
 # Pull latest images
 log "Pulling latest images..."
@@ -111,8 +111,9 @@ if [ $? -ne 0 ]; then
     log "ERROR: Failed to start containers, attempting rollback..."
     
     # Extract backup
-    tar -xzf "$BACKUP_DIR/pistack-$DATE.tar.gz" -C /home/jman/pistack-restore
-    cd /home/jman/pistack-restore
+    mkdir -p /mnt/pistack-data/pistack-restore
+    tar -xzf "$BACKUP_DIR/pistack-$DATE.tar.gz" -C /mnt/pistack-data/pistack-restore
+    cd /mnt/pistack-data/pistack-restore
     docker compose up -d >> "$LOG_FILE" 2>&1
     
     if [ $? -eq 0 ]; then

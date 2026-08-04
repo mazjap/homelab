@@ -3,7 +3,7 @@
 # https://gethomepage.dev/configs/info-widgets/
 
 - logo:
-    icon: https://jordan-christensen.com/images/favicon.ico
+    icon: https://jordan-christensen.com/favicon.svg
 
 #- search:
 #    provider: custom
