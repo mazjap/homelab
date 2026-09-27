@@ -1,0 +1,8 @@
+{
+  "name": "pistack-4play",
+  "private": true,
+  "description": "4play render server for 4get (copied from 4get/extra/4play/page-render.js)",
+  "dependencies": {
+    "@lawlers/4play": "*"
+  }
+}

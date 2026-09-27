@@ -67,3 +67,6 @@ Session.vim
 tmp/
 temp/
 *.tmp
+
+# 4play render server deps
+4play/node_modules/
