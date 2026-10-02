@@ -1,0 +1,14 @@
+[Unit]
+Description=VNC view of the 4play render browser (localhost only, use an SSH tunnel)
+BindsTo=4player-desktop.service
+After=4player-desktop.service
+
+[Service]
+Type=simple
+User=4player
+Group=4player
+Environment=XDG_RUNTIME_DIR=/run/4player
+Environment=WAYLAND_DISPLAY=wayland-0
+ExecStart=/usr/bin/wayvnc 127.0.0.1 5900
+Restart=on-failure
+RestartSec=5

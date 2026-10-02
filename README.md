@@ -45,6 +45,6 @@ Uptime Kuma monitors all services, tracking availability and sending alerts when
 
 Document management came with Paperless-ngx, which OCRs and organizes scanned documents, making everything searchable. Perfect for school transcripts, tax documents, and important papers. Linkding handles bookmark management with tagging and full text search, unifying my bookmarks across different devices and browsers.
 
-The final piece was automation. I wrote an update script that runs every Sunday at 3 AM, backing up configs, pulling upstream changes for 4get, updating Docker images, restarting containers, and rolling back on failure. It emails me only when errors occur, keeping the homelab maintained with no manual intervention.
+The final piece was automation. I wrote an update script that runs every Sunday at 3 AM, backing up configs, merging upstream changes into my 4get fork and rebuilding it, updating Docker images, and restarting only the containers that changed. It sends me a single summary email saying whether the update succeeded and listing what was updated or failed, keeping the homelab maintained with no manual intervention.
 
 What started as ad blocking evolved into a complete self-hosted infrastructure: private DNS, VPN access, Git hosting, document management, search, monitoring, and automated maintenance, all running on a single Raspberry Pi 5.

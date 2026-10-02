@@ -9,12 +9,15 @@
 #   --dry-run  Fetch 4get and pull images, then report what would change.
 #              Nothing is merged, rebuilt, or restarted, and no backup is made.
 
-PISTACK_DIR="/mnt/pistack-data/pistack"
-FOURGET_DIR="/mnt/pistack-data/4get"
+# This script lives in the pistack directory; 4get is cloned next to it
+PISTACK_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+FOURGET_DIR="$(dirname "$PISTACK_DIR")/4get"
 LOG_FILE="$PISTACK_DIR/update.log"
 BACKUP_DIR="$PISTACK_DIR/backups"
-MAIL_TO="jordan.c4922@gmail.com"
 LOG_MAX_LINES=10000
+
+# Report recipient comes from UPDATE_EMAIL in .env
+MAIL_TO=$(grep -E '^UPDATE_EMAIL=' "$PISTACK_DIR/.env" 2>/dev/null | tail -n 1 | cut -d= -f2- | tr -d "\"'")
 
 # Config files to back up before updating (runtime data is not included)
 BACKUP_FILES=(
@@ -98,6 +101,12 @@ send_report() {
     fi
 
     local duration=$(( $(date +%s) - START_TIME ))
+
+    if [ -z "$MAIL_TO" ]; then
+        log "UPDATE_EMAIL is not set in $PISTACK_DIR/.env, not sending report: $subject"
+        log "========== Update finished in $((duration / 60))m $((duration % 60))s =========="
+        return
+    fi
 
     {
         echo "To: $MAIL_TO"

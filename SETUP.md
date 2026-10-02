@@ -112,6 +112,13 @@ PIHOLE_API_KEY=RXhhbXBsZSBvZiB3aGF0IGEgcGlob2xlIGFwaSBrZXkgbWlnaHQgbG9vayBsaWtl=
 
 # Portainer - Set later in setup via web UI
 PORTAINER_API_KEY=RXhhbXBsZSBvZiB3aGF0IGEgcGlob2xlIGFwaSBrZXkgbWlnaHQgbG9vayBsaWtl=
+
+# 4play - Letters and digits only (it goes in a URL and in 4get's generated PHP config)
+# Generate with: tr -dc A-Za-z0-9 </dev/urandom | head -c 40
+FPLAY_PASSWORD=YourLettersAndDigitsOnlyPassword
+
+# Auto-update - Where the weekly update report is emailed
+UPDATE_EMAIL=your-email@gmail.com
 ```
 
 All other environment variables can be set now.
@@ -123,6 +130,9 @@ chmod 600 .env
 
 ### Start Services
 ```bash
+# Install the 4play render server's dependencies (otherwise fourplay restart-loops)
+docker run --rm -u 1000:1000 -e HOME=/tmp -v "$PWD/4play:/app" -w /app node:26-alpine npm install
+
 docker compose up -d
 ```
 
@@ -152,6 +162,13 @@ docker ps
 | Paperless Redis     | 10.2.0.15 | -             | 6379          | N/A (internal)           |
 | Paperless DB        | 10.2.0.16 | -             | 5432          | N/A (internal)           |
 | Paperless           | 10.2.0.17 | 8000          | 8000          | http://paperless.home    |
+| Immich              | 10.2.0.18 | 2283          | 2283          | http://192.168.0.40:2283 |
+| Immich Microservices | 10.2.0.19 | -            | -             | N/A (internal)           |
+| Immich Redis        | 10.2.0.21 | -             | 6379          | N/A (internal)           |
+| Immich DB           | 10.2.0.22 | -             | 5432          | N/A (internal)           |
+| RomM                | 10.2.0.23 | 8080          | 8080          | http://192.168.0.40:8080 |
+| RomM DB             | 10.2.0.24 | -             | 3306          | N/A (internal)           |
+| 4play               | 10.2.0.25 | 127.0.0.1:3131 | 3030, 3000   | N/A (see 4play Setup)    |
 
 ### Pihole Setup
 
@@ -248,45 +265,148 @@ Host gitea.home
 
 ### 4get Setup
 
-4get requires manual compilation for ARM64:
+4get requires manual compilation for ARM64. Clone the fork, which already has
+the ARM64 Dockerfile, the curl-impersonate build files, and CORS headers on
+`api/v1/ac.php` for the Homepage search bar. Clone it next to `pistack`, since
+`auto-update.sh` expects `~/4get`:
 ```bash
 cd ~
-git clone https://git.lolcat.ca/lolcat/4get.git
+git clone https://github.com/mazjap/4get.git
 cd 4get
-
-# Add CORS headers for Homepage integration (optional)
-nvim api/v1/ac.php
 ```
 
-Add at the top after `<?php`: (optional)
-```php
-<?php
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, OPTIONS");
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
-    exit;
-}
-```
-
-Build:
+The 4get Dockerfile builds on a local curl-impersonate image, because upstream
+curl-impersonate doesn't publish one for arm64. Build it once (~15 min on a Pi 5):
 ```bash
-docker build --platform linux/arm64 -t 4get-arm:latest .
+cd curl-impersonate-build
+docker build --platform linux/arm64 -t curl-impersonate-ff-arm64 -f Dockerfile.alpine .
+cd ..
+```
+
+Build 4get. The label records which commit the image was built from, so
+`auto-update.sh` knows when it needs a rebuild:
+```bash
+docker build --platform linux/arm64 --label "fourget.commit=$(git rev-parse HEAD)" -t 4get-arm:latest .
 cd ~/pistack
 docker compose up -d fourget
 ```
+
+4get's settings come from the `FOURGET_*` environment variables in
+`docker-compose.yml` (the image generates `data/config.php` at startup), so
+don't edit `data/config.php` directly.
 
 **Set up Git remotes: (optional)**
 ```bash
 cd ~/4get
 git remote add upstream https://git.lolcat.ca/lolcat/4get.git
 git remote add origin git@gitea.home:jman/4get.git
-git add api/v1/ac.php
-git commit -m "Add CORS headers for autocomplete API"
+
+# Always keep the ARM64 Dockerfile when merging upstream changes
+echo "Dockerfile merge=ours" >> .git/info/attributes
+git config merge.ours.driver true
+
 git push -u origin main
 ```
+
+### 4play Setup (Google search in 4get)
+
+4get's Google scraper loads Google in a real Firefox, controlled through the
+[4play](https://git.lolcat.ca/lolcat/4play) extension:
+
+```
+4get ──HTTP :3000──> fourplay container ──WebSocket :3030 (host 127.0.0.1:3131)──> Firefox + 4play
+```
+
+Firefox runs on the Pi itself (not in Docker) inside a headless labwc session
+that renders on the Pi's GPU, so no monitor is needed and Google sees real
+hardware graphics. It runs as a dedicated `4player` user with a clean profile.
+The config files are in `4play/host/`.
+
+**1. Install packages:**
+```bash
+sudo apt install -y --no-install-recommends labwc wayvnc grim wlr-randr xz-utils \
+    libasound2t64 libatk1.0-0t64 libcairo-gobject2 libdbus-1-3 libevent-2.1-7t64 \
+    libgdk-pixbuf-2.0-0 libgtk-3-0t64 libpango-1.0-0 libx11-xcb1 libxcomposite1 \
+    libxdamage1 libxrandr2 libxtst6 libpci3 libegl1 libgl1-mesa-dri libgbm1 \
+    fontconfig fonts-dejavu fonts-liberation2 fonts-noto-core fonts-noto-color-emoji
+
+# The wayvnc package enables a system-wide VNC server that listens on your LAN.
+# We run our own localhost-only one instead.
+sudo systemctl disable --now wayvnc.service wayvnc-control.service
+```
+
+**2. Create the user and install Firefox** (Mozilla's official ARM64 build,
+which updates itself):
+```bash
+sudo useradd --system --create-home --home-dir /home/4player \
+    --shell /usr/sbin/nologin --groups video,render 4player
+sudo chmod 750 /home/4player
+
+cd /tmp
+curl -L -o firefox.tar.xz "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64-aarch64&lang=en-US"
+sudo tar -xJf firefox.tar.xz -C /home/4player
+sudo mv /home/4player/firefox /home/4player/app
+rm firefox.tar.xz
+```
+
+Tip: to keep Firefox on an SSD instead of the SD card, use an SSD path for
+`--home-dir` and in the commands below. The service files use `$HOME`.
+
+**3. Install the config files:**
+```bash
+cd ~/pistack/4play/host
+sudo install -D -m 644 policies.json   /home/4player/app/distribution/policies.json
+sudo install -D -m 644 user.js         /home/4player/profile/user.js
+sudo install -D -m 644 labwc-autostart /home/4player/.config/labwc/autostart
+sudo chown -R 4player:4player /home/4player
+
+sudo cp 4player-desktop.service 4player-vnc.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now 4player-desktop.service
+```
+
+- `policies.json` force-installs 4play and turns off telemetry, password saving,
+  and first-run pages.
+- `user.js` turns off history and session restore. Don't turn on "Always use
+  private browsing mode": 4play needs containers, which that disables.
+- `4player-vnc.service` is intentionally not enabled; start it only when you
+  need to see the browser.
+
+**4. Point the extension at the render server.** 4play stores its settings
+inside Firefox, and they can only be changed from its toolbar popup, so you
+connect over VNC once.
+
+On the Pi, start VNC (it only listens on the Pi's localhost):
+```bash
+sudo systemctl start 4player-vnc
+```
+
+On your Mac, install a viewer (macOS Screen Sharing can't connect to wayvnc) and
+open an SSH tunnel. Leave the tunnel running; it shows no output:
+```bash
+brew install --cask tigervnc-viewer
+ssh -N -L 5900:127.0.0.1:5900 jman@192.168.0.40
+```
+
+Open TigerVNC Viewer and connect to `localhost:5900`. The "unencrypted" warning
+is fine, since the SSH tunnel encrypts it. Then, in Firefox:
+1. Click the puzzle-piece icon, then 4play.
+2. Set the URL to `ws://127.0.0.1:3131/<FPLAY_PASSWORD from .env>` (port 3131, not
+   the 3030 from the 4play docs, since Gitea uses 3030).
+3. Set the timeout to `30000`.
+4. The icon turns from red to green within about 30 seconds.
+5. Optional: in a new tab, open `about:support` → Graphics. Compositing should
+   say `WebRender` (not `WebRender (Software)`) and WebGL 1 Driver Renderer
+   should mention `V3D`.
+
+Close the viewer, stop the tunnel with Ctrl+C, and stop VNC:
+```bash
+sudo systemctl stop 4player-vnc
+```
+
+**5. Test:** search with the Google scraper in 4get. `docker logs fourplay`
+should show `New browser instance connected` and a `Rendering ...` line per
+search.
 
 ### Homepage Setup
 
@@ -354,13 +474,25 @@ Note: Homepage pulls secrets from `.env` through mappings defined in docker-comp
 Script location: `~/pistack/auto-update.sh`
 
 Features:
-- Backs up configs before updating
-- Updates 4get from upstream
-- Pulls latest Docker images
-- Restarts containers
-- Rolls back on failure
-- Cleans up old backups
-- Emails on errors
+- Backs up configs before updating (keeps the last 7)
+- Merges 4get from upstream, always keeping the ARM64 Dockerfile. If upstream
+  changed their Dockerfile, the report says so, so you can review it.
+- Rebuilds `4get-arm` whenever the image wasn't built from the repo's current
+  commit, including after manual merges. A failed build reverts the merge.
+- Pulls each image separately with retries, so one failed pull only skips that
+  service
+- Recreates only containers whose image or config changed, then checks that
+  every service is running
+- Sends one email: **Homelab Update Succeeded** or **Homelab Update Failed**,
+  listing only what was updated (with versions where the image provides them)
+  and what failed
+- Logs everything else to `update.log` (trimmed to the last 10,000 lines)
+
+Preview what would change without merging, rebuilding, or restarting anything
+(this also sends a "[Dry run]" report):
+```bash
+~/pistack/auto-update.sh --dry-run
+```
 
 ### Email Configuration
 ```bash
@@ -399,12 +531,13 @@ Add:
 MAILTO=your-email@gmail.com
 PATH=/usr/local/bin:/usr/bin:/bin
 
-# Auto-update homelab every Sunday at 3 AM
-0 3 * * 0 /home/jman/pistack/auto-update.sh >> /home/jman/pistack/cron.log 2>&1
-
-# Email log if there were errors
-5 3 * * 0 grep -iE "error|warning|critical" /home/jman/pistack/update.log | tail -50 | mail -s "⚠️ Homelab Update Issues" your-email@gmail.com || true
+# Back up and auto-update homelab every Sunday at 3 AM
+0 3 * * 0 /home/jman/pistack/auto-update.sh
 ```
+
+The script emails its own report (to `UPDATE_EMAIL` in `.env`) and prints
+nothing, so cron only emails you (via `MAILTO`) if the script itself can't run.
+Don't add a second cron line to email the log.
 
 ## Backup & Restore
 
@@ -431,9 +564,15 @@ docker compose up -d
 ## Maintenance
 
 ### Update All Services
+Easiest is to run the auto-update script by hand (it prints its log as it goes):
+```bash
+~/pistack/auto-update.sh
+```
+
+Or manually. `4get-arm` is built locally, so its pull failure is expected:
 ```bash
 cd ~/pistack
-docker compose pull
+docker compose pull --ignore-pull-failures
 docker compose up -d
 docker image prune -f
 ```
@@ -502,9 +641,22 @@ docker compose restart <service>
 ### 4get Autocomplete Not Working
 
 1. Check CORS headers in `api/v1/ac.php`
-2. Rebuild: `docker build --platform linux/arm64 -t 4get-arm:latest .`
+2. Rebuild: `docker build --platform linux/arm64 --label "fourget.commit=$(git rev-parse HEAD)" -t 4get-arm:latest .`
 3. Check browser console for errors
 4. Verify homepage/custom.js is loaded
+
+### 4get Google Search Not Working
+
+1. `docker logs fourplay` should show `New browser instance connected`. If it
+   doesn't, check Firefox: `systemctl status 4player-desktop`.
+2. If Firefox is running but never connects, check the 4play icon over VNC
+   (see 4play Setup, step 4). It should be green, and the URL should use port
+   3131 and the current `FPLAY_PASSWORD`.
+3. "No browser available" errors from 4get mean the same thing as step 2.
+4. Links that look like `/goto?url=...` and 404 mean the running 4get image is
+   older than the repo. Compare `docker exec fourget wc -l scraper/google.php`
+   with `wc -l ~/4get/scraper/google.php`, and rebuild if they differ.
+5. The first search right after Firefox restarts can come back empty. Try again.
 
 ## Support
 

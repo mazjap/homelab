@@ -1,0 +1,26 @@
+[Unit]
+Description=4play render browser (headless labwc + Firefox, GPU rendered)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=4player
+Group=4player
+RuntimeDirectory=4player
+RuntimeDirectoryMode=0700
+Environment=XDG_RUNTIME_DIR=/run/4player
+# wlroots headless backend, rendering on the Pi GPU via /dev/dri/renderD128
+Environment=WLR_BACKENDS=headless
+Environment=WLR_HEADLESS_OUTPUTS=1
+Environment=WLR_RENDERER=gles2
+Environment=WLR_LIBINPUT_NO_DEVICES=1
+Environment=MOZ_ENABLE_WAYLAND=1
+# Firefox lives in the 4player home directory ($$ keeps $HOME for the shell).
+# -S: labwc exits when Firefox exits, so systemd restarts the whole stack.
+ExecStart=/bin/sh -c 'exec /usr/bin/labwc -S "$$HOME/app/firefox --profile $$HOME/profile"'
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

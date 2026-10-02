@@ -1,0 +1,2 @@
+# Give the virtual headless output a normal desktop resolution.
+wlr-randr --output HEADLESS-1 --custom-mode 1920x1080@60Hz

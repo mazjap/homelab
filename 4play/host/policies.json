@@ -1,0 +1,31 @@
+{
+  "policies": {
+    "ExtensionSettings": {
+      "{d58b1f6b-0386-4b99-9208-a1635ad8ae41}": {
+        "installation_mode": "force_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/4play/latest.xpi",
+        "private_browsing": true,
+        "updates_disabled": false
+      }
+    },
+    "DisableTelemetry": true,
+    "DisableFirefoxStudies": true,
+    "DisableFeedbackCommands": true,
+    "DontCheckDefaultBrowser": true,
+    "NoDefaultBookmarks": true,
+    "OverrideFirstRunPage": "",
+    "OverridePostUpdatePage": "",
+    "PasswordManagerEnabled": false,
+    "OfferToSaveLogins": false,
+    "DisableFormHistory": true,
+    "UserMessaging": {
+      "ExtensionRecommendations": false,
+      "FeatureRecommendations": false,
+      "UrlbarInterventions": false,
+      "SkipOnboarding": true,
+      "MoreFromMozilla": false,
+      "FirefoxLabs": false,
+      "Locked": true
+    }
+  }
+}
